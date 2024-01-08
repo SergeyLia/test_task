@@ -1,40 +1,22 @@
+from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
-from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 import stripe
-
 from items.models import Item
+from django.shortcuts import render
 
-stripe.api_key = 'sk_test_4eC39HqLyjWDarjtT1zdp7dc'
+@csrf_exempt
+def get_payment_intent(request, id):
+    item = get_object_or_404(Item, pk=id)
+    stripe.api_key = 'sk_test_4eC39HqLyjWDarjtT1zdp7dc'
+    intent = stripe.PaymentIntent.create(
+        amount=int(item.price * 100),
+        currency='usd',  # Замените 'usd' на вашу фиксированную валюту
+        description=item.name,
+        payment_method_types=['card'],
+    )
+    return JsonResponse({'client_secret': intent.client_secret})
 
-class BuyItemView(View):
-    def get(self, request, item_id):
-        item = get_object_or_404(Item, pk=item_id)
-        session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{
-                'price_data': {
-                    'currency': 'usd',
-                    'product_data': {
-                        'name': item.name,
-                        'description': item.description,
-                    },
-                    'unit_amount': int(item.price * 100),
-                },
-                'quantity': 1,
-            }],
-            mode='payment',
-            success_url='http://example.com/success/',
-            cancel_url='http://example.com/cancel/',
-        )
-        return JsonResponse({'session_id': session.id})
-
-class ItemDetailView(View):
-    def get(self, request, item_id):
-        item = get_object_or_404(Item, pk=item_id)
-        return render(request, 'item_detail.html', {
-            'name': item.name,
-            'description': item.description,
-            'price': item.price,
-            'item_id': item_id,
-        })
+def item_detail(request, id):
+    item = get_object_or_404(Item, pk=id)
+    return render(request, 'item_detail.html', {'item': item})

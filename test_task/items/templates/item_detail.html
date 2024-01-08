@@ -2,27 +2,13 @@
 <html>
 <head>
     <title>Item Detail</title>
-    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
-    <h1>{{ name }}</h1>
-    <p>{{ description }}</p>
-    <p>Price: ${{ price }}</p>
-    <button id="buyButton">Buy</button>
-
-    <script>
-        document.getElementById('buyButton').addEventListener('click', function() {
-            fetch('/buy/{{ item_id }}/')
-                .then(function(response) {
-                    return response.json();
-                })
-                .then(function(data) {
-                    var stripe = Stripe('YOUR_STRIPE_PUBLIC_KEY');
-                    stripe.redirectToCheckout({
-                        sessionId: data.session_id
-                    });
-                });
-        });
-    </script>
+    <h1>{{ item.name }}</h1>
+    <p>{{ item.description }}</p>
+    <p>Price: {{ item.price }}</p>
+    <form action="/buy/{{ item.id }}/" method="GET">
+        <button type="submit">Buy</button>
+    </form>
 </body>
 </html>

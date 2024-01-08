@@ -1,9 +1,7 @@
 from django.urls import path
-from items.views import BuyItemView, ItemDetailView
-
-app_name = 'items'
+from items import views
 
 urlpatterns = [
-    path('buy/<int:item_id>/', BuyItemView.as_view(), name='buy_item'),
-    path('item/<int:item_id>/', ItemDetailView.as_view(), name='item_detail'),
+    path('buy/<int:id>/', views.get_payment_intent, name='get_payment_intent'),
+    path('item/<int:id>/', views.item_detail, name='item_detail'),
 ]
